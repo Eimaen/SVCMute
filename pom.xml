@@ -87,7 +87,10 @@
             <id>aikar</id>
             <url>https://repo.aikar.co/content/groups/aikar/</url>
         </repository>
-
+        <repository>
+            <id>arim-mvn-agpl3</id>
+            <url>https://mvn-repo.arim.space/affero-gpl3/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -120,6 +123,11 @@
             <artifactId>AdvancedBan</artifactId>
             <version>v2.3.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>space.arim.libertybans</groupId>
+            <artifactId>bans-api</artifactId>
+            <version>1.1.0-RC1</version>
         </dependency>
 
         <dependency>

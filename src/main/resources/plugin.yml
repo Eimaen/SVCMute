@@ -6,5 +6,6 @@ softdepend:
   - Essentials
   - LiteBans
   - AdvancedBan
+  - LibertyBans
 depend:
   - voicechat

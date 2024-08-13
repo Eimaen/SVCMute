@@ -27,7 +27,7 @@ public final class SVCMute extends JavaPlugin {
         sqliteHelper = new SQLiteHelper(this);
 
         // Initialize IntegrationManager with SQLiteHelper
-        integrationManager = new IntegrationManager(sqliteHelper);
+        integrationManager = new IntegrationManager(sqliteHelper, LOGGER);
 
         // Register voice chat plugin
         BukkitVoicechatService service = getServer().getServicesManager().load(BukkitVoicechatService.class);

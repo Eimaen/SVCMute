@@ -2,24 +2,32 @@ package net.envexus.svcmute.integrations;
 
 import net.envexus.svcmute.integrations.advancedbans.AdvancedBansMuteChecker;
 import net.envexus.svcmute.integrations.essentials.EssentialsMuteChecker;
+import net.envexus.svcmute.integrations.libertybans.LibertyBansMuteChecker;
 import net.envexus.svcmute.integrations.litebans.LiteBansMuteChecker;
 import net.envexus.svcmute.integrations.svcmute.SQLiteMuteChecker;
 import net.envexus.svcmute.util.SQLiteHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import space.arim.libertybans.api.LibertyBans;
+import space.arim.omnibus.Omnibus;
+import space.arim.omnibus.OmnibusProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class IntegrationManager {
     private final List<MuteChecker> muteCheckers = new ArrayList<>();
     private final List<MutedPlayer> mutedPlayers = new ArrayList<>(); // List to track muted players
     private final SQLiteHelper sqliteHelper;
+    private final Logger logger;
 
-    public IntegrationManager(SQLiteHelper sqliteHelper) {
+    public IntegrationManager(SQLiteHelper sqliteHelper, Logger logger) {
         this.sqliteHelper = sqliteHelper;
+        this.logger = logger;
         registerPlugins();
     }
 
@@ -33,19 +41,32 @@ public class IntegrationManager {
         Plugin advancedBansPlugin = Bukkit.getPluginManager().getPlugin("AdvancedBan");
         boolean isAdvancedBanEnabled = advancedBansPlugin != null && advancedBansPlugin.isEnabled();
 
-        if (!isLiteBansEnabled && !isAdvancedBanEnabled) {
+        Plugin libertyBansPlugin = Bukkit.getPluginManager().getPlugin("LibertyBans");
+        Omnibus libertyBansOmnibus = OmnibusProvider.getOmnibus();
+        LibertyBans libertyBansInstance = libertyBansOmnibus.getRegistry().getProvider(LibertyBans.class).orElse(null);
+        boolean isLibertyBansEnabled = libertyBansPlugin != null && libertyBansPlugin.isEnabled() && libertyBansInstance != null;
+
+        if (!isLiteBansEnabled && !isAdvancedBanEnabled && !isLibertyBansEnabled) {
             Plugin essentialsPlugin = Bukkit.getPluginManager().getPlugin("Essentials");
             if (essentialsPlugin != null && essentialsPlugin.isEnabled()) {
                 muteCheckers.add(new EssentialsMuteChecker(essentialsPlugin));
+                logger.log(Level.INFO, "EssentialsMuteChecker loaded successfully.");
             }
         }
 
         if (isLiteBansEnabled) {
             muteCheckers.add(new LiteBansMuteChecker());
+            logger.log(Level.INFO, "LiteBansMuteChecker loaded successfully.");
         }
 
         if (isAdvancedBanEnabled) {
             muteCheckers.add(new AdvancedBansMuteChecker(advancedBansPlugin));
+            logger.log(Level.INFO, "AdvancedBansMuteChecker loaded successfully.");
+        }
+
+        if (isLibertyBansEnabled) {
+            muteCheckers.add(new LibertyBansMuteChecker(libertyBansInstance));
+            logger.log(Level.INFO, "LibertyBansMuteChecker loaded successfully.");
         }
 
         muteCheckers.add(new SQLiteMuteChecker(sqliteHelper));
